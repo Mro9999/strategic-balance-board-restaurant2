@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>戦略バランスボード - 飲食業界版 | DEARS CONSULTING</title>
+    <meta name="description" content="事業の収益達成可能性を俯瞰視点で可視化する戦略思考支援ツール。トレンド、ブランド、商品、経営環境、価格、コストの6要素で飲食業界の戦略バランスを分析。">
+    <meta name="keywords" content="戦略バランスボード,飲食業界,経営戦略,収益性分析,ビジネス分析,DEARS CONSULTING">
+    <meta name="author" content="DEARS CONSULTING">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="戦略バランスボード - 飲食業界版">
+    <meta property="og:description" content="事業の収益達成可能性を俯瞰視点で可視化する戦略思考支援ツール">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="DEARS CONSULTING">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="戦略バランスボード - 飲食業界版">
+    <meta name="twitter:description" content="事業の収益達成可能性を俯瞰視点で可視化する戦略思考支援ツール">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card-shadow {
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .slider-track {
+            background: linear-gradient(to right, #ff6b6b, #feca57, #48dbfb, #0abde3);
+        }
+        .strategic-element {
+            transition: all 0.3s ease;
+        }
+        .strategic-element:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        .success-indicator {
+            background: radial-gradient(circle, #20bf6b, #26d0ce);
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+        }
+        .insight-box {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            margin: 15px 0;
+        }
+        .strategic-score {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .element-icon {
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        .score-display {
+            background: rgba(255,255,255,0.9);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-top: 16px;
+        }
+        .slider-container {
+            margin-bottom: 1rem;
+        }
+        .slider-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+        .slider-range {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .slider-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .slider-range::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .slider-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        .slider-value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+        @media (max-width: 768px) {
+            .strategic-score {
+                font-size: 2rem;
+            }
+            .element-icon {
+                width: 2.5rem;
+                height: 2.5rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body class="p-4">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="mb-4">
+                <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">
+                    <i class="fas fa-utensils mr-3"></i>戦略バランスボード
+                </h1>
+                <h2 class="text-xl md:text-2xl text-white opacity-90">飲食業界版</h2>
+            </div>
+            <p class="text-base md:text-lg text-white opacity-80 max-w-2xl mx-auto">
+                事業の収益達成可能性を俯瞰視点で可視化する戦略思考支援ツール
+            </p>
+            <div class="mt-4 text-sm text-white opacity-60">
+                Powered by DEARS CONSULTING
+            </div>
+        </div>
+
+        <!-- Success Rate Display -->
+        <div class="bg-white rounded-3xl card-shadow p-6 md:p-8 mb-8">
+            <div class="text-center">
+                <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-4">収益達成可能性</h3>
+                <div class="chart-container">
+                    <canvas id="successChart"></canvas>
+                </div>
+                <div id="successRate" class="strategic-score text-green-600 mt-4">75%</div>
+                <p class="text-gray-600 text-sm md:text-base mt-2">現在の戦略バランスに基づく達成予測</p>
+            </div>
+        </div>
+
+        <!-- Strategic Elements Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+            
+            <!-- 1. トレンド適合性 -->
+            <div class="strategic-element bg-white rounded-3xl card-shadow p-6">
+                <div class="flex items-center mb-6">
+                    <div class="element-icon bg-gradient-to-r from-pink-500 to-rose-500">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800">トレンド適合性</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="slider-container">
+                        <label class="slider-label">健康志向対応</label>
+                        <input type="range" id="healthTrend" min="0" max="100" value="70" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>従来型</span>
+                            <span id="healthTrendValue" class="slider-value">70%</span>
+                            <span>完全対応</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">体験価値創出</label>
+                        <input type="range" id="experienceValue" min="0" max="100" value="65" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>基本提供</span>
+                            <span id="experienceValueValue" class="slider-value">65%</span>
+                            <span>独自体験</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">デリバリー対応</label>
+                        <input type="range" id="deliveryResponse" min="0" max="100" value="60" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>未対応</span>
+                            <span id="deliveryResponseValue" class="slider-value">60%</span>
+                            <span>完全対応</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">サステナビリティ</label>
+                        <input type="range" id="sustainability" min="0" max="100" value="55" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>未着手</span>
+                            <span id="sustainabilityValue" class="slider-value">55%</span>
+                            <span>先進的</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-display">
+                    <div class="text-sm font-semibold text-pink-800">トレンド総合スコア</div>
+                    <div id="trendScore" class="text-2xl font-bold text-pink-600">62.5%</div>
+                </div>
+            </div>
+
+            <!-- 2. ブランド力 -->
+            <div class="strategic-element bg-white rounded-3xl card-shadow p-6">
+                <div class="flex items-center mb-6">
+                    <div class="element-icon bg-gradient-to-r from-purple-500 to-indigo-500">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800">ブランド力</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="slider-container">
+                        <label class="slider-label">業界内認知度</label>
+                        <input type="range" id="brandRecognition" min="0" max="100" value="75" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>無名</span>
+                            <span id="brandRecognitionValue" class="slider-value">75%</span>
+                            <span>業界トップ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">差別化優位性</label>
+                        <input type="range" id="differentiation" min="0" max="100" value="70" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>類似</span>
+                            <span id="differentiationValue" class="slider-value">70%</span>
+                            <span>唯一無二</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">顧客ロイヤルティ</label>
+                        <input type="range" id="customerLoyalty" min="0" max="100" value="80" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>低い</span>
+                            <span id="customerLoyaltyValue" class="slider-value">80%</span>
+                            <span>極めて高い</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">ブランド成長性</label>
+                        <input type="range" id="brandGrowth" min="0" max="100" value="65" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>停滞</span>
+                            <span id="brandGrowthValue" class="slider-value">65%</span>
+                            <span>急成長</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-display">
+                    <div class="text-sm font-semibold text-purple-800">ブランド総合スコア</div>
+                    <div id="brandScore" class="text-2xl font-bold text-purple-600">72.5%</div>
+                </div>
+            </div>
+
+            <!-- 3. 商品・サービス力 -->
+            <div class="strategic-element bg-white rounded-3xl card-shadow p-6">
+                <div class="flex items-center mb-6">
+                    <div class="element-icon bg-gradient-to-r from-green-500 to-emerald-500">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800">商品・サービス力</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="slider-container">
+                        <label class="slider-label">メニュー開発力</label>
+                        <input type="range" id="menuDevelopment" min="0" max="100" value="85" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>平凡</span>
+                            <span id="menuDevelopmentValue" class="slider-value">85%</span>
+                            <span>革新的</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">味・品質</label>
+                        <input type="range" id="tasteQuality" min="0" max="100" value="90" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>普通</span>
+                            <span id="tasteQualityValue" class="slider-value">90%</span>
+                            <span>最高品質</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">独自性・オリジナリティ</label>
+                        <input type="range" id="originality" min="0" max="100" value="75" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>一般的</span>
+                            <span id="originalityValue" class="slider-value">75%</span>
+                            <span>独創的</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">季節・トレンド対応</label>
+                        <input type="range" id="seasonalResponse" min="0" max="100" value="70" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>固定メニュー</span>
+                            <span id="seasonalResponseValue" class="slider-value">70%</span>
+                            <span>柔軟対応</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-display">
+                    <div class="text-sm font-semibold text-green-800">商品総合スコア</div>
+                    <div id="productScore" class="text-2xl font-bold text-green-600">80.0%</div>
+                </div>
+            </div>
+
+            <!-- 4. 経営環境 -->
+            <div class="strategic-element bg-white rounded-3xl card-shadow p-6">
+                <div class="flex items-center mb-6">
+                    <div class="element-icon bg-gradient-to-r from-blue-500 to-cyan-500">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800">経営環境</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="slider-container">
+                        <label class="slider-label">立地・店舗優位性</label>
+                        <input type="range" id="locationAdvantage" min="0" max="100" value="80" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>不利</span>
+                            <span id="locationAdvantageValue" class="slider-value">80%</span>
+                            <span>最高立地</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">オムニチャネル対応</label>
+                        <input type="range" id="omnichannel" min="0" max="100" value="60" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>店舗のみ</span>
+                            <span id="omnichannelValue" class="slider-value">60%</span>
+                            <span>完全統合</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">デジタル活用度</label>
+                        <input type="range" id="digitalUtilization" min="0" max="100" value="55" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>アナログ</span>
+                            <span id="digitalUtilizationValue" class="slider-value">55%</span>
+                            <span>先進的</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">オペレーション効率</label>
+                        <input type="range" id="operationEfficiency" min="0" max="100" value="75" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>非効率</span>
+                            <span id="operationEfficiencyValue" class="slider-value">75%</span>
+                            <span>最適化</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-display">
+                    <div class="text-sm font-semibold text-blue-800">経営環境総合スコア</div>
+                    <div id="environmentScore" class="text-2xl font-bold text-blue-600">67.5%</div>
+                </div>
+            </div>
+
+            <!-- 5. 価格戦略 -->
+            <div class="strategic-element bg-white rounded-3xl card-shadow p-6">
+                <div class="flex items-center mb-6">
+                    <div class="element-icon bg-gradient-to-r from-yellow-500 to-orange-500">
+                        <i class="fas fa-tag"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800">価格戦略</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="slider-container">
+                        <label class="slider-label">価格競争力</label>
+                        <input type="range" id="priceCompetitiveness" min="0" max="100" value="70" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>高すぎる</span>
+                            <span id="priceCompetitivenessValue" class="slider-value">70%</span>
+                            <span>最適価格</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">価値との整合性</label>
+                        <input type="range" id="valueAlignment" min="0" max="100" value="85" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>価値以下</span>
+                            <span id="valueAlignmentValue" class="slider-value">85%</span>
+                            <span>価値以上</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">価格設定柔軟性</label>
+                        <input type="range" id="pricingFlexibility" min="0" max="100" value="65" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>固定</span>
+                            <span id="pricingFlexibilityValue" class="slider-value">65%</span>
+                            <span>動的価格</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">顧客許容価格帯</label>
+                        <input type="range" id="priceAcceptance" min="0" max="100" value="75" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>価格重視</span>
+                            <span id="priceAcceptanceValue" class="slider-value">75%</span>
+                            <span>価値重視</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-display">
+                    <div class="text-sm font-semibold text-yellow-800">価格戦略総合スコア</div>
+                    <div id="pricingScore" class="text-2xl font-bold text-yellow-600">73.8%</div>
+                </div>
+            </div>
+
+            <!-- 6. コスト効率 -->
+            <div class="strategic-element bg-white rounded-3xl card-shadow p-6">
+                <div class="flex items-center mb-6">
+                    <div class="element-icon bg-gradient-to-r from-red-500 to-pink-500">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3 class="text-lg md:text-xl font-bold text-gray-800">コスト効率</h3>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="slider-container">
+                        <label class="slider-label">原価管理</label>
+                        <input type="range" id="costManagement" min="0" max="100" value="80" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>高コスト</span>
+                            <span id="costManagementValue" class="slider-value">80%</span>
+                            <span>最適化</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">人件費効率</label>
+                        <input type="range" id="laborEfficiency" min="0" max="100" value="70" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>非効率</span>
+                            <span id="laborEfficiencyValue" class="slider-value">70%</span>
+                            <span>高効率</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">固定費最適化</label>
+                        <input type="range" id="fixedCostOptimization" min="0" max="100" value="75" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>高負担</span>
+                            <span id="fixedCostOptimizationValue" class="slider-value">75%</span>
+                            <span>最適化</span>
+                        </div>
+                    </div>
+                    
+                    <div class="slider-container">
+                        <label class="slider-label">廃棄ロス削減</label>
+                        <input type="range" id="wasteReduction" min="0" max="100" value="65" 
+                               class="slider-range slider-track">
+                        <div class="slider-info">
+                            <span>高廃棄</span>
+                            <span id="wasteReductionValue" class="slider-value">65%</span>
+                            <span>最小化</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="score-display">
+                    <div class="text-sm font-semibold text-red-800">コスト効率総合スコア</div>
+                    <div id="costScore" class="text-2xl font-bold text-red-600">72.5%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategic Insights -->
+        <div class="bg-white rounded-3xl card-shadow p-6 md:p-8 mb-8">
+            <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-6">戦略的インサイト</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="insight-box">
+                    <h4 class="text-lg font-semibold mb-3">
+                        <i class="fas fa-lightbulb mr-2"></i>強み分析
+                    </h4>
+                    <div id="strengthAnalysis">
+                        <p>商品・サービス力（80.0%）が最大の強み。味・品質とメニュー開発力で差別化を実現。</p>
+                    </div>
+                </div>
+                <div class="insight-box">
+                    <h4 class="text-lg font-semibold mb-3">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>改善機会
+                    </h4>
+                    <div id="improvementAnalysis">
+                        <p>トレンド適合性（62.5%）の向上が急務。デリバリー対応とサステナビリティへの取り組み強化が必要。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h4 class="text-lg font-semibold text-gray-800 mb-3">戦略的推奨アクション</h4>
+                <div id="recommendedActions" class="space-y-2 text-gray-700 text-sm md:text-base">
+                    <div>• デリバリー・テイクアウト体制の強化による売上チャネル拡大</div>
+                    <div>• 健康志向メニューの開発とマーケティング強化</div>
+                    <div>• デジタル活用による顧客接点とオペレーション効率の向上</div>
+                    <div>• サステナビリティ取り組みのブランド価値化</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-white opacity-75 mt-8 pb-4">
+            <p class="text-lg font-semibold">© 2025 DEARS CONSULTING</p>
+            <p class="text-sm mt-2">戦略バランスボード - 事業戦略の可視化と収益達成可能性の最大化をサポート</p>
+            <div class="mt-3 text-xs opacity-60">
+                <a href="https://dearsconsulting.com" class="hover:opacity-80 transition-opacity">
+                    https://dearsconsulting.com
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chart.js setup
+        let successChart;
+        
+        function initializeChart() {
+            const ctx = document.getElementById('successChart').getContext('2d');
+            successChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [75, 25],
+                        backgroundColor: [
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(229, 231, 235, 0.8)'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateAllScores() {
+            // トレンド適合性
+            const healthTrend = parseFloat(document.getElementById('healthTrend').value);
+            const experienceValue = parseFloat(document.getElementById('experienceValue').value);
+            const deliveryResponse = parseFloat(document.getElementById('deliveryResponse').value);
+            const sustainability = parseFloat(document.getElementById('sustainability').value);
+            const trendScore = (healthTrend + experienceValue + deliveryResponse + sustainability) / 4;
+
+            // ブランド力
+            const brandRecognition = parseFloat(document.getElementById('brandRecognition').value);
+            const differentiation = parseFloat(document.getElementById('differentiation').value);
+            const customerLoyalty = parseFloat(document.getElementById('customerLoyalty').value);
+            const brandGrowth = parseFloat(document.getElementById('brandGrowth').value);
+            const brandScore = (brandRecognition + differentiation + customerLoyalty + brandGrowth) / 4;
+
+            // 商品・サービス力
+            const menuDevelopment = parseFloat(document.getElementById('menuDevelopment').value);
+            const tasteQuality = parseFloat(document.getElementById('tasteQuality').value);
+            const originality = parseFloat(document.getElementById('originality').value);
+            const seasonalResponse = parseFloat(document.getElementById('seasonalResponse').value);
+            const productScore = (menuDevelopment + tasteQuality + originality + seasonalResponse) / 4;
+
+            // 経営環境
+            const locationAdvantage = parseFloat(document.getElementById('locationAdvantage').value);
+            const omnichannel = parseFloat(document.getElementById('omnichannel').value);
+            const digitalUtilization = parseFloat(document.getElementById('digitalUtilization').value);
+            const operationEfficiency = parseFloat(document.getElementById('operationEfficiency').value);
+            const environmentScore = (locationAdvantage + omnichannel + digitalUtilization + operationEfficiency) / 4;
+
+            // 価格戦略
+            const priceCompetitiveness = parseFloat(document.getElementById('priceCompetitiveness').value);
+            const valueAlignment = parseFloat(document.getElementById('valueAlignment').value);
+            const pricingFlexibility = parseFloat(document.getElementById('pricingFlexibility').value);
+            const priceAcceptance = parseFloat(document.getElementById('priceAcceptance').value);
+            const pricingScore = (priceCompetitiveness + valueAlignment + pricingFlexibility + priceAcceptance) / 4;
+
+            // コスト効率
+            const costManagement = parseFloat(document.getElementById('costManagement').value);
+            const laborEfficiency = parseFloat(document.getElementById('laborEfficiency').value);
+            const fixedCostOptimization = parseFloat(document.getElementById('fixedCostOptimization').value);
+            const wasteReduction = parseFloat(document.getElementById('wasteReduction').value);
+            const costScore = (costManagement + laborEfficiency + fixedCostOptimization + wasteReduction) / 4;
+
+            // 総合スコア計算（重み付け）
+            const totalScore = (
+                trendScore * 0.20 +      // トレンド適合性: 20%
+                brandScore * 0.25 +      // ブランド力: 25%
+                productScore * 0.25 +    // 商品・サービス力: 25%
+                environmentScore * 0.15 + // 経営環境: 15%
+                pricingScore * 0.10 +    // 価格戦略: 10%
+                costScore * 0.05         // コスト効率: 5%
+            );
+
+            // 表示更新
+            document.getElementById('trendScore').textContent = trendScore.toFixed(1) + '%';
+            document.getElementById('brandScore').textContent = brandScore.toFixed(1) + '%';
+            document.getElementById('productScore').textContent = productScore.toFixed(1) + '%';
+            document.getElementById('environmentScore').textContent = environmentScore.toFixed(1) + '%';
+            document.getElementById('pricingScore').textContent = pricingScore.toFixed(1) + '%';
+            document.getElementById('costScore').textContent = costScore.toFixed(1) + '%';
+            document.getElementById('successRate').textContent = Math.round(totalScore) + '%';
+
+            // チャート更新
+            successChart.data.datasets[0].data = [totalScore, 100 - totalScore];
+            successChart.update();
+
+            // インサイト更新
+            updateInsights(trendScore, brandScore, productScore, environmentScore, pricingScore, costScore, totalScore);
+        }
+
+        function updateInsights(trend, brand, product, environment, pricing, cost, total) {
+            const scores = [
+                {name: 'トレンド適合性', score: trend},
+                {name: 'ブランド力', score: brand},
+                {name: '商品・サービス力', score: product},
+                {name: '経営環境', score: environment},
+                {name: '価格戦略', score: pricing},
+                {name: 'コスト効率', score: cost}
+            ];
+
+            const strongest = scores.reduce((a, b) => a.score > b.score ? a : b);
+            const weakest = scores.reduce((a, b) => a.score < b.score ? a : b);
+
+            document.getElementById('strengthAnalysis').innerHTML = 
+                `<p>${strongest.name}（${strongest.score.toFixed(1)}%）が最大の強み。この優位性を活かした戦略展開が重要。</p>`;
+
+            document.getElementById('improvementAnalysis').innerHTML = 
+                `<p>${weakest.name}（${weakest.score.toFixed(1)}%）の改善が優先課題。収益達成可能性向上の鍵となる領域。</p>`;
+
+            // 推奨アクション更新
+            let actions = [];
+            if (trend < 70) actions.push('• トレンド対応メニューの開発とデリバリー体制強化');
+            if (brand < 75) actions.push('• ブランド認知度向上とSNSマーケティング強化');
+            if (product < 80) actions.push('• 商品開発力の向上と季節対応メニューの充実');
+            if (environment < 70) actions.push('• デジタル化推進とオムニチャネル戦略の展開');
+            if (pricing < 75) actions.push('• 価格戦略の見直しと価値訴求の強化');
+            if (cost < 75) actions.push('• コスト構造の最適化と廃棄ロス削減');
+
+            if (actions.length === 0) {
+                actions.push('• 現在の優位性維持と更なる差別化戦略の展開');
+                actions.push('• 新規事業領域への展開検討');
+            }
+
+            document.getElementById('recommendedActions').innerHTML = 
+                actions.map(action => `<div>${action}</div>`).join('');
+        }
+
+        // イベントリスナー設定
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeChart();
+            
+            const sliders = document.querySelectorAll('input[type="range"]');
+            sliders.forEach(slider => {
+                // 初期値表示
+                const valueElement = document.getElementById(slider.id + 'Value');
+                if (valueElement) {
+                    valueElement.textContent = slider.value + '%';
+                }
+                
+                // スライダー変更時の処理
+                slider.addEventListener('input', function() {
+                    const valueElement = document.getElementById(this.id + 'Value');
+                    if (valueElement) {
+                        valueElement.textContent = this.value + '%';
+                    }
+                    updateAllScores();
+                });
+            });
+
+            // 初期計算
+            updateAllScores();
+        });
+
+        // PWA対応（オフライン機能）
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful');
+                }, function(err) {
+                    console.log('ServiceWorker registration failed');
+                });
+            });
+        }
+    </script>
+</body>
+</html>
